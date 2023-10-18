@@ -31,4 +31,12 @@ export const getItems = async (ids: string[]) => {
   });
 };
 
-export const createItem = async (attrs: CreateItemAttrs, userId: string) => { };
+export const createItem = async (attrs: CreateItemAttrs, userId: string) => {
+  const id = genId();
+
+  const serialized = serialize(attrs);
+
+  client.hSet(itemsKey(id), serialized)
+
+  return id;
+};

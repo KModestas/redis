@@ -1,4 +1,5 @@
 import type { Item } from '$services/types';
+// Luxon is a library for working with dates and times in JavaScript.
 import { DateTime } from 'luxon';
 
 export const deserialize = (id: string, item: { [key: string]: string }): Item => {
