@@ -1,14 +1,55 @@
-import { createClient } from 'redis';
+import { itemsKey, itemsByViewsKey, itemsViewsKey } from '$services/keys';
+
+import { createClient, defineScript } from 'redis';
+
 
 const client = createClient({
 	socket: {
 		host: process.env.REDIS_HOST,
 		port: parseInt(process.env.REDIS_PORT)
 	},
-	password: process.env.REDIS_PW
+	password: process.env.REDIS_PW,
+	scripts: {
+		// script will be accessible on client.incrementView()
+		incrementView: defineScript({
+			// specify how many redis keys will be used in your script
+			NUMBER_OF_KEYS: 3,
+			SCRIPT: `
+				local itemsViewsKey = KEYS[1]
+				local itemsKey = KEYS[2]
+				local itemsByViewsKey = KEYS[3]
+				local itemId = ARGV[1]
+				local userId = ARGV[2]
+
+				local inserted = redis.call('PFADD', itemsViewsKey, userId)
+
+				if inserted == 1 then
+					redis.call('HINCRBY', itemsKey, 'views', 1)
+					redis.call('ZINCRBY', itemsByViewsKey, 1, itemId)
+				end
+			`,
+			transformArguments(itemId: string, userId: string) {
+				// define all of your redis keys first followed by any other arguments
+				return [
+					// KEYS
+					itemsViewsKey(itemId),
+					itemsKey(itemId),
+					itemsByViewsKey(),
+					// ARGV
+					itemId,
+					userId
+				];
+			},
+			// function to optionally deserialise the result of the script before returning it. 
+			transformReply() {
+				// we are not returning anything from our script
+			}
+		})
+	}
 });
 
 client.on('error', (err) => console.error(err));
+
 client.connect();
 
 export { client };
