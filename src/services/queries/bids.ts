@@ -25,7 +25,8 @@ export const createBid = async (attrs: CreateBidAttrs) => {
 
 		const serialized = serializeHistory(attrs.amount, attrs.createdAt.toMillis());
 
-		// if this function took too long and the lock expired, cancel update commands
+		// if this function took too long and the lock expired, cancel update commands.
+		// NOTE: Since we are using a proxied client, this functionality will happen automatically
 		if (signal.expired) {
 			throw new Error('Lock expired, cant write any more data');
 		}

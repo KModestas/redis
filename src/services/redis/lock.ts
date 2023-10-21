@@ -38,6 +38,7 @@ export const withLock = async (key: string, cb: (redisClient: Client, signal: an
 				signal.expired = true;
 			}, timeoutMs);
 
+			// use the proxied client for the callback. This ensures that an error will be thrown if the lock expires even if we remove / forget to add the code to do in each callback.
 			const proxiedClient = buildClientProxy(timeoutMs);
 			const result = await cb(proxiedClient, signal);
 			return result;
@@ -47,10 +48,12 @@ export const withLock = async (key: string, cb: (redisClient: Client, signal: an
 	}
 };
 
+// Custom client to be used with functions that use locks. Anytime a method on the redis client is called, check if the lock has expired and throw an error
 type Client = typeof client;
 const buildClientProxy = (timeoutMs: number) => {
 	const startTime = Date.now();
 
+	// any time a property / method is accessed on the proxy object, this get() handler will be invoked instead
 	const handler = {
 		get(target: Client, prop: keyof Client) {
 			if (Date.now() >= startTime + timeoutMs) {
@@ -62,6 +65,7 @@ const buildClientProxy = (timeoutMs: number) => {
 		}
 	};
 
+	// return the proxied version of the redis client@
 	return new Proxy(client, handler) as Client;
 };
 
