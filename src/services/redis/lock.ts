@@ -1,7 +1,7 @@
 import { client } from './client';
 import { randomBytes } from 'crypto';
 
-// custom (simplified) lock function
+// custom lock function
 export const withLock = async (key: string, cb: (redisClient: Client, signal: any) => any) => {
 	// Initialize a few variables to control retry behavior
 	const retryDelayMs = 100;
@@ -31,7 +31,10 @@ export const withLock = async (key: string, cb: (redisClient: Client, signal: an
 		// IF the set is successful, then run the callback
 		try {
 			const signal = { expired: false };
+
+			// when lock automatically expires, tell the callback to cancel its operation. 
 			setTimeout(() => {
+				// NOTE: we are mutating the object, so any update to this object will be reflected inside the callback
 				signal.expired = true;
 			}, timeoutMs);
 

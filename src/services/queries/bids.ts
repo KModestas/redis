@@ -25,6 +25,7 @@ export const createBid = async (attrs: CreateBidAttrs) => {
 
 		const serialized = serializeHistory(attrs.amount, attrs.createdAt.toMillis());
 
+		// if this function took too long and the lock expired, cancel update commands
 		if (signal.expired) {
 			throw new Error('Lock expired, cant write any more data');
 		}
@@ -46,7 +47,7 @@ export const createBid = async (attrs: CreateBidAttrs) => {
 	// *** transaction (WATCH) implementation *** 
 	// execute our transaction in a new redis connection
 	return client.executeIsolated(async (isolatedClient) => {
-		// watch for changes to the current item that we are trying to update. Cancel the transaction if a change from elseware occurs (prevent concurrency issues)
+		// watch for changes to the current item that we are trying to update. Cancel the transaction if a change from elsewhere occurs (prevent concurrency issues)
 		await isolatedClient.watch(itemsKey(attrs.itemId));
 
 		const item = await getItem(attrs.itemId);
