@@ -1,11 +1,49 @@
 import type { CreateBidAttrs, Bid } from '$services/types';
-import { client } from '$services/redis';
+import { client, withLock } from '$services/redis';
 import { bidHistoryKey, itemsKey, itemsByPriceKey } from '$services/keys';
 import { getItem } from './items';
 
 import { DateTime } from 'luxon';
 
 export const createBid = async (attrs: CreateBidAttrs) => {
+	// *** Lock implemenatation ***
+	return withLock(attrs.itemId, async (lockedClient: typeof client, signal: any) => {
+		// 1) Fetching the item
+		// 2) Doing validation
+		// 3) Writing some data
+		const item = await getItem(attrs.itemId);
+
+		if (!item) {
+			throw new Error('Item does not exist');
+		}
+		if (item.price >= attrs.amount) {
+			throw new Error('Bid too low');
+		}
+		if (item.endingAt.diff(DateTime.now()).toMillis() < 0) {
+			throw new Error('Item closed to bidding');
+		}
+
+		const serialized = serializeHistory(attrs.amount, attrs.createdAt.toMillis());
+
+		if (signal.expired) {
+			throw new Error('Lock expired, cant write any more data');
+		}
+
+		return Promise.all([
+			lockedClient.rPush(bidHistoryKey(attrs.itemId), serialized),
+			lockedClient.hSet(itemsKey(item.id), {
+				bids: item.bids + 1,
+				price: attrs.amount,
+				highestBidUserId: attrs.userId
+			}),
+			lockedClient.zAdd(itemsByPriceKey(), {
+				value: item.id,
+				score: attrs.amount
+			})
+		]);
+	});
+
+	// *** transaction (WATCH) implementation *** 
 	// execute our transaction in a new redis connection
 	return client.executeIsolated(async (isolatedClient) => {
 		// watch for changes to the current item that we are trying to update. Cancel the transaction if a change from elseware occurs (prevent concurrency issues)
