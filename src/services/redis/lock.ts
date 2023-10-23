@@ -13,7 +13,8 @@ export const withLock = async (key: string, cb: (redisClient: Client, signal: an
 	// Create the lock key
 	const lockKey = `lock:${key}`;
 
-	// Set up a while loop to implement the retry behavior
+	// Set up a while loop to implement the retry behavior 
+	// NOTE: this retry strategry can be refactored with Streams + XREAD BLOCK to prevent constantly polling
 	while (retries >= 0) {
 		retries--;
 		// Try to do a SET NX operation
