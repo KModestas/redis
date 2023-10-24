@@ -7,7 +7,9 @@ import { getSession, saveSession } from '$services/queries/sessions';
 
 const keys = new keygrip([process.env.COOKIE_KEY || 'alskdjf']);
 
+// NOTE: "event" is also often named as "request"
 export const useSession: Handle = async ({ event, resolve }) => {
+	// extract cookie from header of the request
 	const { auth } = parse(event.request.headers.get('cookie') || '');
 
 	let sessionId = '';
@@ -17,16 +19,20 @@ export const useSession: Handle = async ({ event, resolve }) => {
 	}
 
 	let session: Session;
+
+	// found valid cookie but session doesn't exist, create it:
 	if (!sessionId || !keys.verify(sessionId, sig)) {
 		session = await createSession();
 	} else {
 		session = (await getSession(sessionId)) || { id: '', userId: '', username: '' };
 	}
 
+	// makes the session avaliable in other hooks 
 	event.locals.session = session;
 	const res = await resolve(event);
 
 	if (event.locals.session) {
+		// save session in redis as a hash
 		await saveSession(event.locals.session);
 		res.headers.set('set-cookie', sessionToCookie(session.id));
 	} else {
@@ -41,6 +47,7 @@ const createSession = async (): Promise<Session> => {
 
 	const session = {
 		id,
+		// currently only storing a sessionId
 		userId: '',
 		username: ''
 	};

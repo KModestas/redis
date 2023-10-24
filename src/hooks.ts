@@ -17,9 +17,13 @@ if (!process.env.REDIS_HOST) {
 	process.exit(1);
 }
 
+// runs these hooks for every request
 export const handle: Handle = sequence(useErrors, useCachePage, useSession);
 
+// The returned session object is passed to the load function in your components and also to your layout and page components as a session prop  
+// useful for populating session-dependent data, like user information, so you don't have to fetch it in each component.
 export const getSession: GetSession = (event) => {
+	// this is being set inside of useSession 
 	return event.locals.session;
 };
 

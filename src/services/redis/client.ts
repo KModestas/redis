@@ -3,7 +3,6 @@ import { itemsKey, itemsByViewsKey, itemsViewsKey } from '$services/redis/keys';
 import { createClient, defineScript } from 'redis';
 import { createIndexes } from './create-indexes';
 
-
 const client = createClient({
 	socket: {
 		host: process.env.REDIS_HOST,
