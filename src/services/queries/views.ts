@@ -1,5 +1,5 @@
 import { client } from "$services/redis";
-import { itemsKey, itemsByViewsKey, itemsViewsKey } from "$services/keys";
+import { itemsKey, itemsByViewsKey, itemsViewsKey } from "$services/redis/keys";
 
 export const incrementView = async (itemId: string, userId: string) => {
   // moved the logic below into a LUA script to prevent multiple round trips to redis when executing commands:

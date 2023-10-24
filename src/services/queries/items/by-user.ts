@@ -1,5 +1,5 @@
 import { client } from '$services/redis';
-import { itemsIndexKey } from '$services/keys';
+import { itemsIndexKey } from '$services/redis/keys';
 import { deserialize } from './deserialize';
 
 interface QueryOpts {

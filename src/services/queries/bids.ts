@@ -1,6 +1,6 @@
 import type { CreateBidAttrs, Bid } from '$services/types';
 import { client, withLock } from '$services/redis';
-import { bidHistoryKey, itemsKey, itemsByPriceKey } from '$services/keys';
+import { bidHistoryKey, itemsKey, itemsByPriceKey } from '$services/redis/keys';
 import { getItem } from './items';
 
 import { DateTime } from 'luxon';

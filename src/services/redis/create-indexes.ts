@@ -1,6 +1,6 @@
 import { SchemaFieldTypes } from 'redis';
 import { client } from './client';
-import { itemsIndexKey, itemsKey } from '$services/keys';
+import { itemsIndexKey, itemsKey } from '$services/redis/keys';
 
 export const createIndexes = async () => {
   const indexes = await client.ft._list();

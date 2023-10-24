@@ -1,6 +1,6 @@
 import { client } from '$services/redis';
 import { deserialize } from './deserialize';
-import { itemsIndexKey } from '$services/keys';
+import { itemsIndexKey } from '$services/redis/keys';
 
 export const searchItems = async (term: string, size: number = 5) => {
   const cleaned = term

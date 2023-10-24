@@ -2,7 +2,7 @@ import type { CreateItemAttrs } from '$services/types';
 import { client } from '$services/redis';
 import { serialize } from './serialize';
 import { genId } from '$services/utils';
-import { itemsKey, itemsByViewsKey, itemsByEndingAtKey, itemsByPriceKey } from '$services/keys';
+import { itemsKey, itemsByViewsKey, itemsByEndingAtKey, itemsByPriceKey } from '$services/redis/keys';
 import { deserialize } from './deserialize';
 
 export const getItem = async (id: string) => {

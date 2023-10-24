@@ -1,5 +1,5 @@
 import type { Session } from '$services/types';
-import { sessionsKey } from '$services/keys';
+import { sessionsKey } from '$services/redis/keys';
 import { client } from '$services/redis';
 
 export const getSession = async (id: string) => {

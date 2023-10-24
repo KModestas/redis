@@ -1,4 +1,4 @@
-import { itemsKey, itemsByViewsKey, itemsViewsKey } from '$services/keys';
+import { itemsKey, itemsByViewsKey, itemsViewsKey } from '$services/redis/keys';
 
 import { createClient, defineScript } from 'redis';
 import { createIndexes } from './create-indexes';

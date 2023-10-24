@@ -1,5 +1,5 @@
 import { client } from '$services/redis';
-import { itemsKey, itemsByViewsKey } from '$services/keys';
+import { itemsKey, itemsByViewsKey } from '$services/redis/keys';
 import { deserialize } from './deserialize';
 
 export const itemsByViews = async (order: 'DESC' | 'ASC' = 'DESC', offset = 0, count = 10) => {

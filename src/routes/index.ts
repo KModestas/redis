@@ -1,12 +1,11 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import {
-	itemsByBids,
-	itemsByLikes,
 	itemsByPrice,
 	itemsByViews,
 	itemsByEndingTime
 } from '$services/queries/items';
 
+// root request at /
 export const get: RequestHandler<any, any> = async () => {
 	const [endingSoonest, mostViews, highestPrice] = await Promise.all([
 		itemsByEndingTime('ASC', 0, 10),
