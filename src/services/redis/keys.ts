@@ -17,4 +17,4 @@ export const itemsViewsKey = (itemId: string) => `items:views#${itemId}`; // HYP
 export const itemsByViewsKey = () => 'items:views'; // SORTED SET (ZSET)
 export const itemsByEndingAtKey = () => 'items:endingAt'; // SORTED SET (ZSET)
 export const itemsByPriceKey = () => 'items:price'; // SORTED SET (ZSET)
-export const itemsIndexKey = () => 'idx:items'; // INDEX
+export const itemsIndexKey = () => 'idx:items'; // INDEX (RediSearch)

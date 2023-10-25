@@ -4,8 +4,8 @@ import { deserialize } from './deserialize';
 
 export const itemsByViews = async (order: 'DESC' | 'ASC' = 'DESC', offset = 0, count = 10) => {
   // run sort command on items:views zset
+  // our goal is to return items sorted by views. Since the zset is already sorted, we dont use the SORT command to sort the data but rather to fetch extra fields from each item hash (rather than making 2 seperate requests)
   let results: any = await client.sort(itemsByViewsKey(), {
-    // TODO:
     GET: [
       '#', // gets the id of each element
       `${itemsKey('*')}->name`, // items#*->name 
@@ -14,7 +14,7 @@ export const itemsByViews = async (order: 'DESC' | 'ASC' = 'DESC', offset = 0, c
       `${itemsKey('*')}->imageUrl`,
       `${itemsKey('*')}->price`
     ],
-    // disable sorting (pass in a key that doesn't exist).
+    // disable sorting (pass in a key that doesn't actually exist).
     BY: 'nosort',
     DIRECTION: order,
     LIMIT: {
@@ -25,8 +25,6 @@ export const itemsByViews = async (order: 'DESC' | 'ASC' = 'DESC', offset = 0, c
 
   // our results are returned in an array of strings
   const items = [];
-
-  console.log('results ', results)
 
   while (results.length) {
     const [id, name, views, endingAt, imageUrl, price, ...rest] = results;

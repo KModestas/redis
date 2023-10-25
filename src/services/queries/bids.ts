@@ -32,6 +32,7 @@ export const createBid = async (attrs: CreateBidAttrs) => {
 		}
 
 		return Promise.all([
+			// we push new bids to the end (right) of the list:
 			lockedClient.rPush(bidHistoryKey(attrs.itemId), serialized),
 			lockedClient.hSet(itemsKey(item.id), {
 				bids: item.bids + 1,
@@ -84,12 +85,13 @@ export const createBid = async (attrs: CreateBidAttrs) => {
 
 export const getBidHistory = async (itemId: string, offset = 0, count = 10): Promise<Bid[]> => {
 	// since we can only retrieve values from a list via index, use offset and count to calculate index:
+	// NOTE: we are using a negative index to start from the right of the list (this will get us the newest bids)
 	const startIndex = -1 * offset - count;
 	const endIndex = -1 - offset;
 
 	const range = await client.lRange(bidHistoryKey(itemId), startIndex, endIndex);
 
-	return range.map((bid) => deserializeHistory(bid)); return [];
+	return range.map((bid) => deserializeHistory(bid));
 };
 
 const serializeHistory = (amount: number, createdAt: number) => {
